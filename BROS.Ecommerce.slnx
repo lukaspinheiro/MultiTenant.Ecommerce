@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BROS.Api/BROS.Api.csproj" />
+  <Project Path="BROS.Application/BROS.Application.csproj" />
+  <Project Path="BROS.Domain/BROS.Domain.csproj" />
+  <Project Path="BROS.Infrastructure/BROS.Infrastructure.csproj" />
+</Solution>

@@ -1,0 +1,6 @@
+@BROS.Api_HostAddress = http://localhost:5151
+
+GET {{BROS.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

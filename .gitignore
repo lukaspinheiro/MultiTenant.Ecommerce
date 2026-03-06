@@ -1,0 +1,19 @@
+# Pastas de build e temporárias
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+*.user
+*.suo
+*.sln.docstates
+*.db
+*.sqlite
+
+# Arquivos de log e logs do dotnet
+*.log
+*.trx
+
+# Ignorar arquivos de pacotes (mas manter o nuget.config)
+**/packages/
+!nuget.config
