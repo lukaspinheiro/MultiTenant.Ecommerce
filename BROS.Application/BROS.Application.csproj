@@ -13,4 +13,8 @@
     <Folder Include="UseCases\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BROS.Domain\BROS.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
