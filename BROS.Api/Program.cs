@@ -1,36 +1,25 @@
-using BROS.Domain.Interfaces;
-using BROS.Infrastructure.Data;
-using BROS.Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
+using BROS.Application; 
+using BROS.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#region Configurações de Serviços de Infraestrutura
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ITenantProvider, TenantProvider>();
-#endregion
-
-#region Registro do EF Core com PostgreSQL
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
-#endregion
-
-#region Registro dos Repositórios (se tiver mais, adicione aqui)
-builder.Services.AddScoped<ITenantRepository, BROS.Infrastructure.Repositories.TenantRepository>();
-#endregion
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
 
 #region Serviços padrão
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+#endregion
 
 var app = builder.Build();
-#endregion
 
 #region Configuração do Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUI(options => {
+        options.SwaggerEndpoint("/openapi/v1.json", "BROS.Api v1");
+    });
 }
 
 app.UseHttpsRedirection();
