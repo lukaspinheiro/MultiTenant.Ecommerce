@@ -23,6 +23,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<BROS.Api.Middlewares.TenantResolutionMiddleware>();
+
 app.UseAuthorization();
 app.MapControllers();
 

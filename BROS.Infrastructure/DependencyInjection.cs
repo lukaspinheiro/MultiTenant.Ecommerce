@@ -17,6 +17,7 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString));
 
         services.AddHttpContextAccessor();
+        services.AddScoped<ITenantContext, TenantContext>();
         services.AddScoped<ITenantProvider, TenantProvider>();
         services.AddScoped<ITenantRepository, TenantRepository>();
 

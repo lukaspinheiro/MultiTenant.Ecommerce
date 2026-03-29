@@ -43,9 +43,14 @@ public class ApplicationDbContext : DbContext
             return Expression.Lambda(Expression.Constant(true), parameter);
         }
 
-        var providerCall = Expression.Call(
-            Expression.Constant(_tenantProvider),
-            typeof(ITenantProvider).GetMethod(nameof(ITenantProvider.GetTenantId))!);
+        var methodInfo = typeof(ITenantProvider).GetMethod(nameof(ITenantProvider.ObterTenantId));
+
+        if (methodInfo == null)
+        {
+            throw new InvalidOperationException("Método ObterTenantId não encontrado na interface ITenantProvider.");
+        }
+
+        var providerCall = Expression.Call(Expression.Constant(_tenantProvider), methodInfo);
 
         var body = Expression.Equal(property, providerCall);
         return Expression.Lambda(body, parameter);
