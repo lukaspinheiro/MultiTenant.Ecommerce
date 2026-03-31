@@ -1,21 +1,28 @@
 ﻿using BROS.Domain.Entities;
 using BROS.Domain.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Linq.Expressions;
 
 namespace BROS.Infrastructure.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<Usuario, IdentityRole<Guid>, Guid>
 {
     private readonly ITenantProvider _tenantProvider;
 
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, ITenantProvider? tenantProvider = null)
+    public ApplicationDbContext(
+        DbContextOptions<ApplicationDbContext> options,
+        IServiceProvider serviceProvider) 
         : base(options)
     {
-        _tenantProvider = tenantProvider!;
+        _tenantProvider = serviceProvider.GetService<ITenantProvider>()!;
     }
 
-    public DbSet<Tenant> Tenants { get; set; }
+    public DbSet<Tenant> Tenants { get; set; } = default!;
+
+    public Guid? CurrentTenantId => _tenantProvider?.ObterTenantId();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -23,36 +30,32 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
+        modelBuilder.Entity<Usuario>(entity =>
+        {
+            entity.HasIndex(u => new { u.NormalizedUserName, u.TenantId })
+                  .IsUnique()
+                  .HasDatabaseName("MultiTenantUserNameIndex");
+
+            entity.HasIndex(u => new { u.NormalizedEmail, u.TenantId })
+                  .IsUnique()
+                  .HasDatabaseName("MultiTenantEmailIndex");
+        });
+
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(ITenantEntity).IsAssignableFrom(entityType.ClrType))
             {
-                modelBuilder.Entity(entityType.ClrType)
-                    .HasQueryFilter(ConvertFilterExpression(entityType.ClrType));
+                var parameter = Expression.Parameter(entityType.ClrType, "e");
+                
+                var property = Expression.Property(parameter, nameof(ITenantEntity.TenantId));
+
+                var contextProperty = Expression.Property(Expression.Constant(this), nameof(CurrentTenantId));
+
+                Expression comparison = Expression.Equal(property, Expression.Convert(contextProperty, property.Type));
+
+                var lambda = Expression.Lambda(comparison, parameter);
+                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
             }
         }
-    }
-
-    private LambdaExpression ConvertFilterExpression(Type type)
-    {
-        var parameter = Expression.Parameter(type, "e");
-        var property = Expression.Property(parameter, nameof(ITenantEntity.TenantId));
-
-        if (_tenantProvider == null)
-        {
-            return Expression.Lambda(Expression.Constant(true), parameter);
-        }
-
-        var methodInfo = typeof(ITenantProvider).GetMethod(nameof(ITenantProvider.ObterTenantId));
-
-        if (methodInfo == null)
-        {
-            throw new InvalidOperationException("Método ObterTenantId não encontrado na interface ITenantProvider.");
-        }
-
-        var providerCall = Expression.Call(Expression.Constant(_tenantProvider), methodInfo);
-
-        var body = Expression.Equal(property, providerCall);
-        return Expression.Lambda(body, parameter);
     }
 }
