@@ -1,19 +1,49 @@
-# Pastas de build e temporárias
+# Build folders
+[Bb]in/
+[Oo]bj/
 **/bin/
 **/obj/
-**/.vs/
-**/.vscode/
-**/.idea/
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+.idea/
 *.user
 *.suo
 *.sln.docstates
+*.userosscache
+*.sln.ids
+
+# Database / SQLite
 *.db
 *.sqlite
+*.mdb
+*.ldf
+*.mdf
 
-# Arquivos de log e logs do dotnet
+# Logs / Tests
 *.log
 *.trx
 
-# Ignorar arquivos de pacotes (mas manter o nuget.config)
+# NuGet Packages
+packages/
 **/packages/
 !nuget.config
+*.nupkg
+
+# Configuration / Secrets
+# appsettings.json (Template base agora rastreado)
+appsettings.Development.json
+appsettings.*.user.json
+usersecrets.json
+.env
+
+# Publish folders
+publish/
+[Pp]ublish/
+**/publish/
+
+# System files
+.DS_Store
+Thumbs.db
+/BROS.Api/appsettings.Development.json

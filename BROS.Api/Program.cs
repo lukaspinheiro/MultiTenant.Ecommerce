@@ -24,6 +24,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+
 app.UseMiddleware<BROS.Api.Middlewares.TenantResolutionMiddleware>();
 
 app.UseAuthorization();
