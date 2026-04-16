@@ -14,10 +14,10 @@ public class ApplicationDbContext : IdentityDbContext<Usuario, IdentityRole<Guid
 
     public ApplicationDbContext(
         DbContextOptions<ApplicationDbContext> options,
-        IServiceProvider serviceProvider) 
+        IServiceProvider? serviceProvider = null) 
         : base(options)
     {
-        _tenantProvider = serviceProvider.GetService<ITenantProvider>()!;
+        _tenantProvider = serviceProvider?.GetService<ITenantProvider>()!;
     }
 
     public DbSet<Tenant> Tenants { get; set; } = default!;

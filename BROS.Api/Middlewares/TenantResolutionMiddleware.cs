@@ -13,6 +13,17 @@ public class TenantResolutionMiddleware
 
     public async Task InvokeAsync(HttpContext context, ITenantRepository repository, ITenantContext tenantContext)
     {
+        if (context.User.Identity?.IsAuthenticated == true)
+        {
+            var tenantClaim = context.User.FindFirst("tenant_id")?.Value;
+            if (Guid.TryParse(tenantClaim, out var tenantId))
+            {
+                tenantContext.SetTenant(tenantId, "auth-token");
+                await _next(context);
+                return;
+            }
+        }
+
         if (context.Request.Headers.TryGetValue("X-Tenant", out var tenantHeader))
         {
             var subdominio = tenantHeader.ToString();
